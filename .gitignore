@@ -1,0 +1,4 @@
+/target
+/src/keep-notes/**
+!src/keep-notes/example-dream.json
+Noto.json
