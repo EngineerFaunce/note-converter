@@ -50,3 +50,17 @@ pub fn read_notes() -> Vec<KeepNote> {
     notes
 }
 
+pub fn deserialize_noto_backup() -> NotoData {
+    let file = match File::open("./src/Noto.json") {
+        Ok(file) => file,
+        Err(e) => panic!("Error opening Noto.json: {:?}", e),
+    };
+
+    let reader = BufReader::new(file);
+    let data: NotoData = match serde_json::from_reader(reader) {
+        Ok(noto_data) => noto_data,
+        Err(e) => panic!("Unexpected JSON object: {:?}", e),
+    };
+
+    data
+}

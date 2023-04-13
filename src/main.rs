@@ -49,6 +49,7 @@ fn main() {
 
     println!("Number of notes to be converted: {}", converted_notes.len());
 
-    println!("Number of converted notes: {}", converted_notes.len());
+    let noto = note::deserialize_noto_backup();
 
+    println!("{}", noto.folders[0].title);
 }
