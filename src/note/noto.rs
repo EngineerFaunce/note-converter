@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
+use dialoguer::{theme::ColorfulTheme, Select};
 use serde::{Deserialize, Serialize};
+use std::{fmt, fs::File, io::BufReader};
 
 #[derive(Clone, Deserialize)]
 pub enum NotoColor {
@@ -120,6 +122,16 @@ pub struct NotoData {
     pub settings: NotoSettings,
 }
 
+pub struct FolderChoice {
+    folder: NotoFolder,
+}
+
+impl fmt::Display for FolderChoice {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.folder.title)
+    }
+}
+
 /// Reads the Noto backup into a struct
 pub fn deserialize_noto_backup() -> NotoData {
     let file = match File::open("./data/noto/Noto.example.json") {
@@ -134,4 +146,34 @@ pub fn deserialize_noto_backup() -> NotoData {
     };
 
     data
+}
+
+pub fn prompt_folder_selection(folders: &Vec<NotoFolder>) -> i64 {
+    let folder_choices: Vec<FolderChoice> = folders
+        .iter()
+        .enumerate()
+        .map(|(index, folder)| {
+            if index == 0 {
+                FolderChoice {
+                    folder: NotoFolder {
+                        title: String::from("Root (default)"),
+                        ..folder.clone()
+                    },
+                }
+            } else {
+                FolderChoice {
+                    folder: folder.clone(),
+                }
+            }
+        })
+        .collect();
+
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose a folder:")
+        .items(&folder_choices)
+        .default(0)
+        .interact()
+        .unwrap();
+
+    folder_choices[selection].folder.id
 }
