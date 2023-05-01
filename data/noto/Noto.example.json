@@ -1,0 +1,114 @@
+{
+    "folders": [
+        {
+            "id": -1,
+            "title": "",
+            "position": 0,
+            "color": "Black",
+            "creationDate": "2022-10-24T02:26:59.987Z",
+            "layout": "Linear",
+            "notePreviewSize": 15,
+            "isArchived": false,
+            "isPinned": false,
+            "isShowNoteCreationDate": false,
+            "newNoteCursorPosition": "Body",
+            "sortingType": "CreationDate",
+            "sortingOrder": "Descending",
+            "grouping": "None",
+            "groupingOrder": "Descending",
+            "isVaulted": false,
+            "scrollingPosition": 0,
+            "filteringType": "Inclusive",
+            "openNotesIn": "Editor"
+        },
+        {
+            "id": 1,
+            "title": "Dream Log",
+            "position": 1,
+            "color": "Cyan",
+            "creationDate": "2022-10-27T02:48:27.716Z",
+            "layout": "Linear",
+            "notePreviewSize": 15,
+            "isArchived": false,
+            "isPinned": false,
+            "isShowNoteCreationDate": true,
+            "newNoteCursorPosition": "Body",
+            "sortingType": "CreationDate",
+            "sortingOrder": "Descending",
+            "grouping": "None",
+            "groupingOrder": "Descending",
+            "isVaulted": false,
+            "scrollingPosition": 0,
+            "filteringType": "Inclusive",
+            "openNotesIn": "Editor"
+        },
+        {
+            "id": 2,
+            "title": "Recipes",
+            "position": 2,
+            "color": "DeepOrange",
+            "creationDate": "2023-01-17T22:28:57.822Z",
+            "layout": "Linear",
+            "notePreviewSize": 15,
+            "isArchived": false,
+            "isPinned": false,
+            "isShowNoteCreationDate": false,
+            "newNoteCursorPosition": "Body",
+            "sortingType": "CreationDate",
+            "sortingOrder": "Descending",
+            "grouping": "None",
+            "groupingOrder": "Descending",
+            "isVaulted": false,
+            "scrollingPosition": 0,
+            "filteringType": "Inclusive",
+            "openNotesIn": "Editor"
+        }
+    ],
+    "notes": [
+        {
+            "id": 1,
+            "folderId": 1,
+            "title": "2023-02-13",
+            "body": "Remember our promise.",
+            "position": 0,
+            "creationDate": "2023-02-13T12:11:25.164Z",
+            "isPinned": false,
+            "isArchived": false,
+            "isVaulted": false,
+            "accessDate": "2023-02-13T12:11:25.164Z",
+            "scrollingPosition": 0
+        }
+    ],
+    "labels": [
+        {
+            "id": 1,
+            "folderId": 2,
+            "title": "Memory",
+            "color": "Gray",
+            "position": 0
+        }
+    ],
+    "noteLabels": [
+    ],
+    "settings": {
+        "theme": "System",
+        "font": "Nunito",
+        "language": "System",
+        "icon": "DarkSide",
+        "vaultTimeout": "Immediately",
+        "isVaultOpen": false,
+        "isBioAuthEnabled": false,
+        "lastVersion": "2.2.1",
+        "sortingType": "CreationDate",
+        "sortingOrder": "Descending",
+        "isShowNotesCount": true,
+        "isDoNotDisturb": false,
+        "isScreenOn": true,
+        "mainInterfaceId": -4,
+        "isRememberScrollingPosition": true,
+        "allNotesScrollingPosition": 0,
+        "recentNotesScrollingPosition": 0,
+        "scheduledNotesScrollingPosition": 0,
+        "archivedNotesScrollingPosition": 0
+    }
+}
