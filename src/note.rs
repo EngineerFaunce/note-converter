@@ -6,12 +6,14 @@ use self::{keep::KeepNote, noto::NotoNote};
 pub mod keep;
 pub mod noto;
 
-pub fn convert_notes(keep_notes: Vec<KeepNote>, folder_id: i64, max_id: i64) -> Vec<NotoNote> {
+pub fn convert_notes(keep_notes: Vec<KeepNote>, folder_id: i64, max_id: i64, max_position: i32) -> Vec<NotoNote> {
     let mut converted_notes: Vec<NotoNote> = Vec::new();
     let mut note_id = max_id;
+    let mut note_position = max_position;
 
     for note in keep_notes {
         note_id += 1;
+        note_position += 1;
 
         let time = match NaiveDateTime::from_timestamp_opt(
             (note.created_timestamp_usec / 1000000) as i64,
@@ -30,7 +32,7 @@ pub fn convert_notes(keep_notes: Vec<KeepNote>, folder_id: i64, max_id: i64) -> 
             folder_id,
             title: eastern_time.format("%Y-%m-%d").to_string(),
             body: note.text_content,
-            position: 0,
+            position: note_position,
             creation_date: DateTime::from_utc(time, Utc),
             is_pinned: false,
             is_archived: note.is_archived,
@@ -43,6 +45,4 @@ pub fn convert_notes(keep_notes: Vec<KeepNote>, folder_id: i64, max_id: i64) -> 
     }
 
     converted_notes
-
-    // converted_notes.sort_by(|a, b| a.creation_date.cmp(&b.creation_date));
 }
