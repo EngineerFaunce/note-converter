@@ -3,7 +3,7 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use serde::{Deserialize, Serialize};
 use std::{fmt, fs::File, io::BufReader};
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum NotoColor {
     Gray,
     Blue,
@@ -28,7 +28,7 @@ pub enum NotoColor {
     Black,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum SortOrder {
     Ascending,
     Descending,
@@ -50,7 +50,7 @@ pub struct NotoNote {
     pub scrolling_position: i64,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotoFolder {
     pub id: i64,
@@ -74,7 +74,7 @@ pub struct NotoFolder {
     pub open_notes_in: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotoLabel {
     pub id: i64,
@@ -84,11 +84,11 @@ pub struct NotoLabel {
     pub position: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotoNoteLabel {}
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotoSettings {
     pub theme: String,
@@ -112,7 +112,7 @@ pub struct NotoSettings {
     pub archived_notes_scrolling_position: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotoData {
     pub folders: Vec<NotoFolder>,
@@ -134,7 +134,9 @@ impl fmt::Display for FolderChoice {
 
 /// Reads the Noto backup into a struct
 pub fn deserialize_noto_backup() -> NotoData {
-    let file = match File::open("./data/noto/Noto.example.json") {
+    let file_path = "./data/noto/Noto.json";
+
+    let file = match File::open(file_path) {
         Ok(file) => file,
         Err(e) => panic!("Error opening Noto.json: {:?}", e),
     };
@@ -146,6 +148,12 @@ pub fn deserialize_noto_backup() -> NotoData {
     };
 
     data
+}
+
+pub fn serialize_noto_data(data: &NotoData) {
+    let mut file = File::create("./data/noto/Noto.updated.json").expect("Failed to create file");
+
+    serde_json::to_writer_pretty(&mut file, data).expect("Failed to write JSON");
 }
 
 pub fn prompt_folder_selection(folders: &Vec<NotoFolder>) -> i64 {
