@@ -1,5 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
-use chrono_tz::{Tz, US::Eastern};
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc, Local};
 
 use self::{keep::KeepNote, noto::NotoNote};
 
@@ -22,15 +21,16 @@ pub fn convert_notes(keep_notes: Vec<KeepNote>, folder_id: i64, max_id: i64, max
             Some(dt) => dt,
             None => panic!("Invalid timestamp."),
         };
+
         // convert the keep note timestamp into an ISO 8601 datetime
-        // TODO: need to determine user's timezone
-        let eastern_time: DateTime<Tz> = Eastern.from_utc_datetime(&time);
+        let user_timezone = Local::now().timezone();
+        let user_time = user_timezone.from_utc_datetime(&time);
 
         // serialize the keep note data into noto format
         let noto_note: NotoNote = NotoNote {
             id: note_id,
             folder_id,
-            title: eastern_time.format("%Y-%m-%d").to_string(),
+            title: user_time.format("%Y-%m-%d").to_string(),
             body: note.text_content,
             position: note_position,
             creation_date: DateTime::from_utc(time, Utc),
