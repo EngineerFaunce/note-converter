@@ -57,5 +57,7 @@ pub fn read_notes() -> Vec<KeepNote> {
         notes.push(keep_note);
     }
 
+    notes.sort_by(|a, b| a.created_timestamp_usec.cmp(&b.created_timestamp_usec));
+
     notes
 }
