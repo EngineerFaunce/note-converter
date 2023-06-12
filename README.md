@@ -1,7 +1,11 @@
-# Dream Log Converter
+# Note Converter
 
-A small script for converting notes from Google Keep to a format supporte by [Noto](https://github.com/alialbaali/Noto). While my purpose for this tool is to convert my personal dream logs, the program can be used to convert anything.
+A small script for converting notes from Google Keep to formats supported by other note apps. 
+> At the moment only Google Keep -> [Noto](https://github.com/alialbaali/Noto) conversion is supported, but this may change in the future. 
 
 ## Usage
 
-Simply place the notes from Google Keep into the `src/keep-notes` directory and then run the program. If no `Noto.json` file exists in the root directory, one will be created; Otherwise an existing backup will be updated.
+1. Place exported Google Keep notes into the `data/keep-notes` directory 
+2. Place `Noto.json` backup file into `data/noto`
+3. Run the script. You will be prompted to choose a Noto folder to store converted notes in
+4. Once the script is complete you will be able to take the updated Noto backup and import it
