@@ -132,8 +132,9 @@ impl fmt::Display for FolderChoice {
     }
 }
 
-/// Reads the Noto backup into a struct
+/// Reads a Noto backup into a struct
 pub fn deserialize_noto_backup() -> NotoData {
+    // TODO: prompt which noto backup to deserialize
     let file_path = "./data/noto/Noto.json";
 
     let file = match File::open(file_path) {
@@ -150,12 +151,20 @@ pub fn deserialize_noto_backup() -> NotoData {
     data
 }
 
+/// Creates an updated Noto backup
+/// 
+/// # Arguments
+/// * `data` - noto data to be serialized
 pub fn serialize_noto_data(data: &NotoData) {
     let mut file = File::create("./data/noto/Noto.updated.json").expect("Failed to create file");
 
     serde_json::to_writer_pretty(&mut file, data).expect("Failed to write JSON");
 }
 
+/// Displays a prompt of available noto folder choices
+/// 
+/// # Arguments
+/// * folders - list of noto folders
 pub fn prompt_folder_selection(folders: &Vec<NotoFolder>) -> i64 {
     let folder_choices: Vec<FolderChoice> = folders
         .iter()
