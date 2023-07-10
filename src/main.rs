@@ -1,27 +1,34 @@
-use crate::note::{keep, noto};
+use dialoguer::{theme::ColorfulTheme, Select};
+use note::{convert_notes, NoteFormat};
 
 mod note;
 
 fn main() {
-    let mut noto = noto::deserialize_noto_backup();
+    let source_formats = vec![NoteFormat::GoogleKeep];
+    let target_formats = vec![NoteFormat::Noto];
 
-    let chosen_folder_id = noto::prompt_folder_selection(&noto.folders);
-    let max_id = noto.notes[0].id;
-    let mut current_max_position = 0;
+    let source_selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose the format of the source notes:")
+        .items(&source_formats)
+        .default(0)
+        .interact();
 
-    for note in &noto.notes {
-        if note.folder_id == chosen_folder_id {
-            current_max_position = note.position;
-            break;
-        }
-    }
+    let source = match source_selection {
+        Ok(index) => &source_formats[index],
+        _ => panic!("Invalid selection"),
+    };
 
-    let source_notes = keep::read_notes();
+    let target_selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose the format of the converted notes:")
+        .items(&target_formats)
+        .default(0)
+        .interact();
 
-    let mut converted_notes = note::convert_notes(source_notes, chosen_folder_id, max_id, current_max_position);
+    let target = match target_selection {
+        Ok(index) => &target_formats[index],
+        _ => panic!("Invalid selection"),
+    };
 
-    noto.notes.append(&mut converted_notes);
-
-    noto::serialize_noto_data(&noto);
+    convert_notes(source, target);
 
 }

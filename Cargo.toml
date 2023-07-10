@@ -1,5 +1,5 @@
 [package]
-name = "dream-log-converter"
+name = "note-converter"
 version = "0.1.0"
 edition = "2021"
 description = "A tool for converting notes between different formats."
