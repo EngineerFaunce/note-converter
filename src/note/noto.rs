@@ -152,9 +152,15 @@ pub fn deserialize_noto_backup() -> NotoData {
 /// # Arguments
 /// * `data` - noto data to be serialized
 pub fn serialize_noto_data(data: &NotoData) {
-    let mut file = File::create("./data/noto/Noto.updated.json").expect("Failed to create file");
+    let mut file = match File::create("./data/noto/Noto.updated.json") {
+        Ok(file) => file,
+        Err(e) => panic!("Unable to open file for writing: {:?}", e)
+    };
 
-    serde_json::to_writer_pretty(&mut file, data).expect("Failed to write JSON");
+    match serde_json::to_writer_pretty(&mut file, data) {
+        Ok(()) => (),
+        Err(e) => panic!("Failed to write to JSON file: {:?}", e)
+    }
 }
 
 /// Displays a prompt of available noto folder choices
@@ -162,13 +168,17 @@ pub fn serialize_noto_data(data: &NotoData) {
 /// # Arguments
 /// * folders - list of noto folders
 pub fn prompt_folder_selection(folders: &Vec<NotoFolder>) -> i64 {
-    let selection = Select::with_theme(&ColorfulTheme::default())
+    let folder_selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose a folder:")
         .item("Root (default)")
         .items(&folders[1..folders.len()])
         .default(0)
-        .interact()
-        .unwrap();
+        .interact();
 
-    folders[selection].id
+    let folder = match folder_selection {
+        Ok(index) => index,
+        Err(e) => panic!("Error selecting folder: {:?}", e)
+    };
+
+    folders[folder].id
 }
