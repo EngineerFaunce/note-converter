@@ -1,5 +1,6 @@
 /target
-/data/keep-notes/**
-/data/noto/**
+
+/data/**
+
 !/data/keep-notes/example-dream.json
 !/data/noto/Noto.example.json

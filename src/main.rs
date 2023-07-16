@@ -5,7 +5,7 @@ mod note;
 
 fn main() {
     let source_formats = vec![NoteFormat::GoogleKeep];
-    let target_formats = vec![NoteFormat::Noto];
+    let target_formats = vec![NoteFormat::Noto, NoteFormat::Markdown];
 
     let source_selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Choose the format of the source notes:")
