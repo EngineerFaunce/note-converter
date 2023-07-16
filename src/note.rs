@@ -2,6 +2,7 @@ use core::panic;
 use std::{fmt, fs::File, io::Write};
 
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use self::{
     keep::KeepNote,
@@ -24,6 +25,21 @@ impl fmt::Display for NoteFormat {
             NoteFormat::GoogleKeep => write!(f, "Google Keep"),
             NoteFormat::Markdown => write!(f, "Markdown"),
             NoteFormat::Noto => write!(f, "Noto"),
+        }
+    }
+}
+
+#[derive(Clone)]
+enum FileNameFormat {
+    Original,
+    Date,
+}
+
+impl fmt::Display for FileNameFormat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            FileNameFormat::Original => write!(f, "Use note's original title"),
+            FileNameFormat::Date => write!(f, "Use the note's creation date (YYYY-MM-DD)"),
         }
     }
 }
@@ -60,6 +76,23 @@ fn convert_usec_timestamp_to_datetime(timestamp: u64) -> NaiveDateTime {
     time
 }
 
+fn prompt_title_format() -> FileNameFormat {
+    let format_options = vec![FileNameFormat::Original, FileNameFormat::Date];
+
+    let format_selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose the converted note's file name format: ")
+        .items(&format_options)
+        .default(0)
+        .interact();
+
+    let format = match format_selection {
+        Ok(index) => index,
+        Err(e) => panic!("Error selecting folder: {:?}", e),
+    };
+
+    format_options[format].clone()
+}
+
 /// Converts google keep notes to the Noto format
 ///
 /// # Arguments
@@ -70,6 +103,8 @@ fn convert_keep_to_noto(source_notes: Vec<KeepNote>, mut noto: NotoData) {
 
     // Get folder ID
     let chosen_folder_id = noto::prompt_folder_selection(&noto.folders);
+
+    let title_format: FileNameFormat = prompt_title_format();
 
     // max ID will always be the most recent note
     let mut note_id = noto.notes[0].id;
@@ -96,7 +131,10 @@ fn convert_keep_to_noto(source_notes: Vec<KeepNote>, mut noto: NotoData) {
         let noto_note: NotoNote = NotoNote {
             id: note_id,
             folder_id: chosen_folder_id,
-            title: user_time.format("%Y-%m-%d").to_string(),
+            title: match title_format {
+                FileNameFormat::Original => note.title,
+                FileNameFormat::Date => user_time.format("%Y-%m-%d").to_string(),
+            },
             body: note.text_content,
             position: note_position,
             creation_date: DateTime::from_utc(time, Utc),
@@ -118,11 +156,18 @@ fn convert_keep_to_noto(source_notes: Vec<KeepNote>, mut noto: NotoData) {
 
 /// Converts google keep notes to markdown files
 fn convert_keep_to_markdown(source_notes: &Vec<KeepNote>) {
+    let title_format: FileNameFormat = prompt_title_format();
+
     for note in source_notes {
         // convert the keep note timestamp into an ISO 8601 datetime
         let time = convert_usec_timestamp_to_datetime(note.created_timestamp_usec);
         let user_timezone = Local::now().timezone();
         let user_time = user_timezone.from_utc_datetime(&time);
+
+        let file_name = match title_format {
+            FileNameFormat::Original => note.title.replace("/", "_"), // remove any slashes from the note title
+            FileNameFormat::Date => user_time.format("%Y-%m-%d").to_string(),
+        };
 
         let file_path = format!("./data/markdown/{}.md", file_name);
 
