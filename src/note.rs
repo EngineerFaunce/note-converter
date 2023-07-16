@@ -1,5 +1,5 @@
 use core::panic;
-use std::fmt;
+use std::{fmt, fs::File, io::Write};
 
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
 
@@ -11,15 +11,18 @@ use self::{
 pub mod keep;
 pub mod noto;
 
+/// Supported note formats
 pub enum NoteFormat {
     GoogleKeep,
     Noto,
+    Markdown,
 }
 
 impl fmt::Display for NoteFormat {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             NoteFormat::GoogleKeep => write!(f, "Google Keep"),
+            NoteFormat::Markdown => write!(f, "Markdown"),
             NoteFormat::Noto => write!(f, "Noto"),
         }
     }
@@ -38,7 +41,10 @@ pub fn convert_notes(source: &NoteFormat, target: &NoteFormat) {
 
             convert_keep_to_noto(source_notes, noto);
         }
-
+        (NoteFormat::GoogleKeep, NoteFormat::Markdown) => {
+            let source_notes = keep::read_notes();
+            convert_keep_to_markdown(&source_notes)
+        }
         _ => {
             panic!("error")
         }
@@ -106,4 +112,22 @@ fn convert_keep_to_noto(source_notes: Vec<KeepNote>, mut noto: NotoData) {
     noto.notes.append(&mut converted_notes);
 
     noto::serialize_noto_data(&noto);
+}
+
+/// Converts google keep notes to markdown files
+fn convert_keep_to_markdown(source_notes: &Vec<KeepNote>) {
+    for note in source_notes {
+        let file_name = note.title.replace("/", "_");
+        let file_path = format!("./data/markdown/{}.md", file_name);
+
+        let mut file = match File::create(file_path) {
+            Ok(file) => file,
+            Err(e) => panic!("Unable to create markdown file for {}: {:?}", note.title, e),
+        };
+
+        match file.write_all(note.text_content.as_bytes()) {
+            Ok(()) => (),
+            Err(e) => panic!("Error writing keep note text content to file: {:?}", e),
+        }
+    }
 }
