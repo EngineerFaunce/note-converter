@@ -51,6 +51,15 @@ pub fn convert_notes(source: &NoteFormat, target: &NoteFormat) {
     }
 }
 
+fn convert_usec_timestamp_to_datetime(timestamp: u64) -> NaiveDateTime {
+    let time = match NaiveDateTime::from_timestamp_opt((timestamp / 1000000) as i64, 0) {
+        Some(dt) => dt,
+        None => panic!("Invalid timestamp."),
+    };
+
+    time
+}
+
 /// Converts google keep notes to the Noto format
 ///
 /// # Arguments
@@ -78,15 +87,8 @@ fn convert_keep_to_noto(source_notes: Vec<KeepNote>, mut noto: NotoData) {
         note_id += 1;
         note_position += 1;
 
-        let time = match NaiveDateTime::from_timestamp_opt(
-            (note.created_timestamp_usec / 1000000) as i64,
-            0,
-        ) {
-            Some(dt) => dt,
-            None => panic!("Invalid timestamp."),
-        };
-
         // convert the keep note timestamp into an ISO 8601 datetime
+        let time = convert_usec_timestamp_to_datetime(note.created_timestamp_usec);
         let user_timezone = Local::now().timezone();
         let user_time = user_timezone.from_utc_datetime(&time);
 
@@ -117,7 +119,11 @@ fn convert_keep_to_noto(source_notes: Vec<KeepNote>, mut noto: NotoData) {
 /// Converts google keep notes to markdown files
 fn convert_keep_to_markdown(source_notes: &Vec<KeepNote>) {
     for note in source_notes {
-        let file_name = note.title.replace("/", "_");
+        // convert the keep note timestamp into an ISO 8601 datetime
+        let time = convert_usec_timestamp_to_datetime(note.created_timestamp_usec);
+        let user_timezone = Local::now().timezone();
+        let user_time = user_timezone.from_utc_datetime(&time);
+
         let file_path = format!("./data/markdown/{}.md", file_name);
 
         let mut file = match File::create(file_path) {
