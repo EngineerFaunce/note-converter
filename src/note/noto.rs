@@ -1,7 +1,11 @@
 use chrono::{DateTime, Utc};
 use dialoguer::{theme::ColorfulTheme, Select};
 use serde::{Deserialize, Serialize};
-use std::{fmt, fs::File, io::BufReader};
+use std::{
+    fmt,
+    fs::{self, File},
+    io::BufReader,
+};
 
 #[derive(Clone, Deserialize, Serialize)]
 pub enum NotoColor {
@@ -128,14 +132,19 @@ impl fmt::Display for NotoFolder {
     }
 }
 
+const BASE_PATH: &str = "./data/noto";
+
 /// Reads a Noto backup into a struct
 pub fn deserialize_noto_backup() -> NotoData {
-    // TODO: prompt which noto backup to deserialize
-    let file_path = "./data/noto/Noto.json";
+    let file_selection = match prompt_backup_selection() {
+        Ok(file_name) => file_name,
+        Err(e) => panic!("Error selecting Noto backup: {:?}", e),
+    };
+    let file_path = format!("{}/{}", BASE_PATH, file_selection);
 
     let file = match File::open(file_path) {
         Ok(file) => file,
-        Err(e) => panic!("Error opening Noto.json: {:?}", e),
+        Err(e) => panic!("Error opening Noto backup: {:?}", e),
     };
 
     let reader = BufReader::new(file);
@@ -148,23 +157,23 @@ pub fn deserialize_noto_backup() -> NotoData {
 }
 
 /// Creates an updated Noto backup
-/// 
+///
 /// # Arguments
 /// * `data` - noto data to be serialized
 pub fn serialize_noto_data(data: &NotoData) {
-    let mut file = match File::create("./data/noto/Noto.updated.json") {
+    let mut file = match File::create(format!("{}/Noto.updated.json", BASE_PATH)) {
         Ok(file) => file,
-        Err(e) => panic!("Unable to open file for writing: {:?}", e)
+        Err(e) => panic!("Unable to open file for writing: {:?}", e),
     };
 
     match serde_json::to_writer_pretty(&mut file, data) {
         Ok(()) => (),
-        Err(e) => panic!("Failed to write to JSON file: {:?}", e)
+        Err(e) => panic!("Failed to write to JSON file: {:?}", e),
     }
 }
 
 /// Displays a prompt of available noto folder choices
-/// 
+///
 /// # Arguments
 /// * folders - list of noto folders
 pub fn prompt_folder_selection(folders: &Vec<NotoFolder>) -> i64 {
@@ -177,8 +186,38 @@ pub fn prompt_folder_selection(folders: &Vec<NotoFolder>) -> i64 {
 
     let folder = match folder_selection {
         Ok(index) => index,
-        Err(e) => panic!("Error selecting folder: {:?}", e)
+        Err(e) => panic!("Error selecting folder: {:?}", e),
     };
 
     folders[folder].id
+}
+
+pub fn prompt_backup_selection() -> Result<String, &'static str> {
+    if let Ok(file_paths) = fs::read_dir(BASE_PATH) {
+        let file_names: Vec<String> = file_paths
+            .filter_map(|entry| {
+                if let Ok(entry) = entry {
+                    if let Some(file_name) = entry.path().file_name() {
+                        return Some(file_name.to_string_lossy().into_owned());
+                    }
+                }
+                None
+            })
+            .collect();
+
+        let some_selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Choose a Noto backup to read:")
+            .items(&file_names)
+            .default(0)
+            .interact();
+
+        let file = match some_selection {
+            Ok(index) => index,
+            Err(e) => panic!("Error selecting noto backup: {:?}", e),
+        };
+        Ok(file_names[file].clone())
+    }
+    else {
+        Err("No backups available.")
+    }
 }
