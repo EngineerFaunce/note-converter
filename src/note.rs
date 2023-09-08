@@ -13,6 +13,7 @@ pub mod keep;
 pub mod noto;
 
 /// Supported note formats
+#[derive(PartialEq)]
 pub enum NoteFormat {
     GoogleKeep,
     Noto,
@@ -59,7 +60,11 @@ pub fn convert_notes(source: &NoteFormat, target: &NoteFormat) {
         }
         (NoteFormat::GoogleKeep, NoteFormat::Markdown) => {
             let source_notes = keep::read_notes();
-            convert_keep_to_markdown(&source_notes)
+            convert_keep_to_markdown(&source_notes);
+        }
+        (NoteFormat::Noto, NoteFormat::Markdown) => {
+            let noto = noto::deserialize_noto_backup();
+            convert_noto_to_markdown(&noto);
         }
         _ => {
             panic!("error")
@@ -181,4 +186,32 @@ fn convert_keep_to_markdown(source_notes: &Vec<KeepNote>) {
             Err(e) => panic!("Error writing keep note text content to file: {:?}", e),
         }
     }
+}
+
+/// Converts Noto notes to markdown files
+fn convert_noto_to_markdown(backup_data: &NotoData) {
+    // Get folder ID
+    let chosen_folder_id = noto::prompt_folder_selection(&backup_data.folders);
+
+    let title_format: FileNameFormat = prompt_title_format();
+
+    for note in &backup_data.notes {
+        if note.folder_id == chosen_folder_id {
+            let file_name = match title_format {
+                FileNameFormat::Original => note.title.replace("/", "_"), // remove any slashes from the note title
+                FileNameFormat::Date => note.creation_date.format("%Y-%m-%d").to_string(),
+            };
+            let file_path = format!("./data/markdown/{}.md", file_name);
+
+            let mut file = match File::create(file_path) {
+                Ok(file) => file,
+                Err(e) => panic!("Unable to create markdown file for {}: {:?}", note.title, e),
+            };
+
+            match file.write_all(note.body.as_bytes()) {
+                Ok(()) => (),
+                Err(e) => panic!("Error writing note text content to file: {:?}", e),
+            }
+        }
+    };
 }
